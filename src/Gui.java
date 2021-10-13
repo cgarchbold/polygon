@@ -12,7 +12,8 @@ import java.awt.event.ActionListener;
 public class Gui extends JFrame implements ActionListener {
 
     JMenuBar menuBar;
-    JMenu File;
+    JMenu File, attributes;
+    JMenuItem bspline,boundary, both;
     JButton reset, color;
     JButton fill, play, stop ;
     JLabel animation_sec;
@@ -24,6 +25,14 @@ public class Gui extends JFrame implements ActionListener {
 
         menuBar = new JMenuBar();
         File = new JMenu("File");
+        attributes = new JMenu("Attributes");
+        bspline = new JMenuItem("B-Spline");
+        boundary = new JMenuItem("Boundary");
+        both = new JMenuItem("Boundary & B-Spline...");
+        attributes.add(bspline);
+        attributes.add(boundary);
+        attributes.add(both);
+
         reset = new JButton("Reset");
         color = new JButton("Set Color");
         fill = new JButton("Fill Poly");
@@ -34,8 +43,14 @@ public class Gui extends JFrame implements ActionListener {
         reset.addActionListener(this);
         color.addActionListener(this);
         fill.addActionListener(this);
+        play.addActionListener(this);
+        stop.addActionListener(this);
+        bspline.addActionListener(this);
+        boundary.addActionListener(this);
+        both.addActionListener(this);
 
         menuBar.add(File);
+        menuBar.add(attributes);
         menuBar.add(reset);
         menuBar.add(color);
         menuBar.add(fill);
@@ -77,11 +92,32 @@ public class Gui extends JFrame implements ActionListener {
             if(i.isPoly_fill()){
                 i.setPoly_fill(false);
                 fill.setBackground(null);
+                attributes.setVisible(true);
             }
             else{
                 i.setPoly_fill(true);
                 fill.setBackground(Color.LIGHT_GRAY);
+                attributes.setVisible(false);
             }
         }
+        if(e.getSource() == stop){
+            i.stop();
+        }
+        if(e.getSource() == play){
+            i.play();
+        }
+        if(e.getSource() == both){
+            i.setRender_boundary(true);
+            i.setRender_bspline(true);
+        }
+        if(e.getSource()==boundary){
+            i.setRender_boundary(true);
+            i.setRender_bspline(false);
+        }
+        if(e.getSource()==bspline){
+            i.setRender_boundary(false);
+            i.setRender_bspline(true);
+        }
+
     }
 }
