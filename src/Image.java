@@ -3,6 +3,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.CubicCurve2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 
@@ -89,8 +91,17 @@ public class Image extends JPanel implements MouseListener, MouseMotionListener,
         make_polygon(points);
         if (poly_fill)
             g2d.fillPolygon(poly);
-        else
-            g2d.drawPolygon(poly);
+        else {
+            if(render_boundary)
+                g2d.drawPolygon(poly);
+            if(render_bspline){
+                CubicCurve2D curve  = new CubicCurve2D.Double();
+                Point2D[] curve_points = get_2dPointArray(points);
+                //curve.setCurve(curve_points,0);
+                //g2d.draw(curve);
+                bspline(g,curve_points);
+            }
+        }
 
         //draw vertices, only when not animating
         g2d.setColor(Color.BLACK);
@@ -100,6 +111,55 @@ public class Image extends JPanel implements MouseListener, MouseMotionListener,
         }
         //return transform
         g2d.setTransform(oldXForm);
+    }
+
+    // Sourced from the Multimedia Technology Laboratory National Technical University of Athens
+    // Link : http://www.medialab.ntua.gr/education/ComputerGraphics/JavaExercises/Java/Bspline.java
+    // Originally from Section 4.2 of Ammeraal, L. (1998) Computer Graphics for Java Programmers, Chichester: John Wiley.
+    // Comments added to demonstrate understanding
+    void bspline(Graphics g, Point2D[] P) {
+        //declare parameters
+        int m = 50, n = P.length;
+        //varaibles to track starts and control points
+        double xA, yA, xB, yB, xC, yC, xD, yD,
+                a0, a1, a2, a3, b0, b1, b2, b3, x=0, y=0, x0, y0;
+        boolean first = true;
+
+        //for each point, between first and last
+        for (int i=1; i<n-2; i++)
+        //Declare control point instantiation
+        {  xA=P[i-1].getX(); xB=P[i].getX(); xC=P[i+1].getX(); xD=P[i+2].getX();
+            yA=P[i-1].getY(); yB=P[i].getY(); yC=P[i+1].getY(); yD=P[i+2].getY();
+
+            //cubic parameters
+            a3=(-xA+3*(xB-xC)+xD)/6; b3=(-yA+3*(yB-yC)+yD)/6;
+            a2=(xA-2*xB+xC)/2;       b2=(yA-2*yB+yC)/2;
+            a1=(xC-xA)/2;            b1=(yC-yA)/2;
+            a0=(xA+4*xB+xC)/6;       b0=(yA+4*yB+yC)/6;
+
+            //iterate m times, caculating x and y based on the control, draw small line segments
+            for (int j=0; j<=m; j++)
+            {  x0 = x; y0 = y;
+                double t = (double)j/(double)m;
+                x = ((a3*t+a2)*t+a1)*t+a0;
+                y = ((b3*t+b2)*t+b1)*t+b0;
+                if (first) first = false;
+                else
+                    g.drawLine((int)(x0), (int)(y0), (int)(x), (int)(y));
+            }
+        }
+    }
+
+    public Point2D[] get_2dPointArray(ArrayList<Point> point_list){
+        Point2D[] points = new Point2D[point_list.size()];
+        int c = 0;
+        for(Point p: point_list){
+            Point2D p2 = new Point2D.Double();
+            p2.setLocation(p.x,p.y);
+            points[c] = p2;
+            c++;
+        }
+        return points;
     }
 
     //create polygon object for drawing

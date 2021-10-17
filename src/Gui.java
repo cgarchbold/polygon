@@ -109,14 +109,17 @@ public class Gui extends JFrame implements ActionListener {
         if(e.getSource() == both){
             i.setRender_boundary(true);
             i.setRender_bspline(true);
+            i.repaint();
         }
         if(e.getSource()==boundary){
             i.setRender_boundary(true);
             i.setRender_bspline(false);
+            i.repaint();
         }
         if(e.getSource()==bspline){
             i.setRender_boundary(false);
             i.setRender_bspline(true);
+            i.repaint();
         }
 
     }
